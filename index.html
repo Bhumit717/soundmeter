@@ -39,6 +39,14 @@
       color: white;
       font-weight: bold;
     }
+    #highestVolume {
+      position: fixed;
+      bottom: 70px;
+      left: 20px;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+    }
     .ad-container {
       position: fixed;
       width: 160px;
@@ -77,6 +85,8 @@
   <div id="volumeLevel"></div>
 </div>
 
+<div id="highestVolume">Highest Volume: 0%</div>
+
 <script>
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
@@ -97,9 +107,11 @@
   let bufferLength;
   let dataArray;
 
-  // Gravity settings
-  const gravity = 0.5;  // How fast the player falls when no sound is present
-  const jumpSpeed = -10; // Speed at which player jumps upward
+  // Gravity settings (stronger gravitational pull)
+  const gravity = 1;  // Increased gravity for stronger downward force
+
+  // Highest volume tracking
+  let highestVolume = 0;
 
   // Setup microphone input
   navigator.mediaDevices.getUserMedia({ audio: true })
@@ -135,16 +147,24 @@
     document.getElementById('volumeLevel').style.width = volumePercentage + '%';
     document.getElementById('percentageText').textContent = Math.round(volumePercentage) + '%';
 
-    // If there's significant sound, make the player jump upwards
+    // Update the highest volume percentage
+    if (volumePercentage > highestVolume) {
+      highestVolume = volumePercentage;
+      document.getElementById('highestVolume').textContent = `Highest Volume: ${Math.round(highestVolume)}%`;
+    }
+
+    // If there's sound, move the player upwards
     if (volumePercentage > 50) {
-      playerSpeedY = jumpSpeed;
+      playerSpeedY = -10;  // Negative speed for upwards movement
     }
 
     // Apply gravity to the player, pulling them downward
     playerSpeedY += gravity;
+
+    // Move the player up/down
     playerY += playerSpeedY;
 
-    // Prevent the player from going off-screen
+    // Prevent the player from going off-screen (below the canvas)
     if (playerY > canvas.height - playerHeight) {
       playerY = canvas.height - playerHeight;  // Stop at the bottom
       playerSpeedY = 0;  // Reset vertical speed when hitting the ground
