@@ -80,8 +80,8 @@
 <script>
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
-  canvas.width = 800;
-  canvas.height = 600;
+  canvas.width = window.innerWidth;  // Set canvas width to screen width
+  canvas.height = window.innerHeight;  // Set canvas height to screen height
 
   // Player settings
   const playerWidth = 50;
@@ -164,6 +164,7 @@
     drawPlayer();
     requestAnimationFrame(gameLoop);
   }
+
 </script>
 
 </body>
