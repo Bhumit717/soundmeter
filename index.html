@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sound-Based Mario Game</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #87CEEB;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+    }
+    #volumeMeter {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      width: 200px;
+      height: 30px;
+      background-color: #f0f0f0;
+      border: 2px solid #000;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    #volumeLevel {
+      height: 100%;
+      background-color: green;
+      width: 0%;
+      transition: width 0.05s ease-out;
+    }
+    #percentageText {
+      position: absolute;
+      top: 5px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      font-weight: bold;
+    }
+    .ad-container {
+      position: fixed;
+      width: 160px;
+      height: 300px;
+    }
+    .ad-container.top-left {
+      top: 10px;
+      left: 10px;
+    }
+    .ad-container.top-right {
+      top: 10px;
+      right: 10px;
+    }
+    .ad-container.bottom-right {
+      bottom: 10px;
+      right: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="ad-container top-left">
+  <script async="async" data-cfasync="false" src="//pl25528427.profitablecpmrate.com/3ffc649b872457a6207d10011e4fd928/invoke.js"></script>
+  <div id="container-3ffc649b872457a6207d10011e4fd928"></div>
+</div>
+
+<div class="ad-container top-right">
+  <script async="async" data-cfasync="false" src="//pl25528427.profitablecpmrate.com/3ffc649b872457a6207d10011e4fd928/invoke.js"></script>
+  <div id="container-3ffc649b872457a6207d10011e4fd928"></div>
+</div>
+
+<div class="ad-container bottom-right">
+  <script async="async" data-cfasync="false" src="//pl25528427.profitablecpmrate.com/3ffc649b872457a6207d10011e4fd928/invoke.js"></script>
+  <div id="container-3ffc649b872457a6207d10011e4fd928"></div>
+</div>
+
+<canvas id="gameCanvas"></canvas>
+
+<div id="volumeMeter">
+  <div id="percentageText">0%</div>
+  <div id="volumeLevel"></div>
+</div>
+
+<script>
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = 800;
+  canvas.height = 600;
+
+  // Player settings
+  const playerWidth = 50;
+  const playerHeight = 50;
+  let playerX = canvas.width / 2 - playerWidth / 2;
+  let playerY = canvas.height - playerHeight - 10;
+  let playerSpeedY = 0;  // Vertical speed for gravity
+  const playerColor = 'red';
+
+  // Audio settings
+  let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  let analyser = audioContext.createAnalyser();
+  let bufferLength;
+  let dataArray;
+
+  // Gravity settings
+  const gravity = 0.5;  // How fast the player falls when no sound is present
+  const jumpSpeed = -10; // Speed at which player jumps upward
+
+  // Setup microphone input
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(stream => {
+      let source = audioContext.createMediaStreamSource(stream);
+      source.connect(analyser);
+      analyser.fftSize = 256;
+      bufferLength = analyser.frequencyBinCount;
+      dataArray = new Uint8Array(bufferLength);
+      audioContext.resume(); // Ensure the audio context is resumed after user interaction
+
+      // Start the game loop once the microphone is ready
+      gameLoop();
+    })
+    .catch(err => {
+      console.error('Error accessing the microphone:', err);
+      alert('Microphone access denied! Please allow microphone access to play.');
+    });
+
+  // Update player position based on sound level
+  function updatePlayerPosition() {
+    analyser.getByteFrequencyData(dataArray);
+    let sum = 0;
+    for (let i = 0; i < bufferLength; i++) {
+      sum += dataArray[i];
+    }
+    let average = sum / bufferLength;
+
+    // Calculate percentage of volume (0 to 100)
+    let volumePercentage = Math.min((average / 255) * 100, 100);
+
+    // Update the volume meter
+    document.getElementById('volumeLevel').style.width = volumePercentage + '%';
+    document.getElementById('percentageText').textContent = Math.round(volumePercentage) + '%';
+
+    // If there's significant sound, make the player jump upwards
+    if (volumePercentage > 50) {
+      playerSpeedY = jumpSpeed;
+    }
+
+    // Apply gravity to the player, pulling them downward
+    playerSpeedY += gravity;
+    playerY += playerSpeedY;
+
+    // Prevent the player from going off-screen
+    if (playerY > canvas.height - playerHeight) {
+      playerY = canvas.height - playerHeight;  // Stop at the bottom
+      playerSpeedY = 0;  // Reset vertical speed when hitting the ground
+    }
+  }
+
+  // Draw player
+  function drawPlayer() {
+    ctx.fillStyle = playerColor;
+    ctx.fillRect(playerX, playerY, playerWidth, playerHeight);
+  }
+
+  // Game loop
+  function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    updatePlayerPosition();
+    drawPlayer();
+    requestAnimationFrame(gameLoop);
+  }
+</script>
+
+</body>
+</html>
