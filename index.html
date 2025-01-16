@@ -107,8 +107,8 @@
   let bufferLength;
   let dataArray;
 
-  // Gravity settings (gravity reduced to 1/7)
-  const gravity = 0.142857;  // Gravity reduced to 1/7
+  // Gravity settings (gravity increased by 10x)
+  const gravity = 1.428571;  // Gravity increased by 10x (1/7 * 10)
 
   // Highest volume tracking
   let highestVolume = 0;
@@ -153,12 +153,10 @@
       document.getElementById('highestVolume').textContent = `Highest Volume: ${Math.round(highestVolume)}%`;
     }
 
-    // If there's sound, move the player upwards
-    if (volumePercentage > 50) {
-      playerSpeedY = -10;  // Negative speed for upwards movement
-    }
+    // Move the player upwards in proportion to volume (even if under 50%)
+    playerSpeedY = -volumePercentage * 0.1;  // Adjusted for smooth upward movement
 
-    // Apply gravity to the player, pulling them downward
+    // Apply gravity to the player, pulling them downward (increased gravity)
     playerSpeedY += gravity;
 
     // Move the player up/down
@@ -179,10 +177,10 @@
 
   // Game loop
   function gameLoop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    updatePlayerPosition();
-    drawPlayer();
-    requestAnimationFrame(gameLoop);
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+    updatePlayerPosition();  // Update the player position based on volume
+    drawPlayer();  // Draw the player on the canvas
+    requestAnimationFrame(gameLoop);  // Loop the game
   }
 
 </script>
